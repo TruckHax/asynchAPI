@@ -28,11 +28,11 @@
 
 // includes, project
 #include <helper_cuda.h>
-#include <helper_functions.h> // helper utility functions 
+#include <helper_functions.h> // helper utility functions
 
 // Questions:
 //
-// how many streaming multiprocessors (SM's) are on my 1050? the GTX 1080Ti has 28 SM's
+// how many streaming multiprocessors (SM's) are on my GeForce GTX 1050 Ti? the GTX 1080Ti has 28 SM's
 //
 // https://developer.nvidia.com/blog/nvidia-turing-architecture-in-depth/
 //
@@ -111,8 +111,8 @@ __global__ void addKernel(int* c, int* a, int* b, int n)
 #if _MSC_VER >= 1920    // VS 2019 - ?? CUDA_VERSION
 __global__ void increment_kernel()
 {
-    printf("blockIdx x %d y %d z %d threadIdx x %d y %d blockDim x %d y %d gridDim x %d y %d\n",
-        blockIdx.x, blockIdx.y, blockIdx.z, threadIdx.x, threadIdx.y, blockDim.x, blockDim.y, gridDim.x, gridDim.y);
+    printf("blockIdx x %02d y %02d z %02d threadIdx x %02d y %02d z %02d blockDim x %02d y %02d z %02d gridDim x %02d y %02d z %02d\n",
+        blockIdx.x, blockIdx.y, blockIdx.z, threadIdx.x, threadIdx.y, threadIdx.z, blockDim.x, blockDim.y, blockDim.z, gridDim.x, gridDim.y, gridDim.z);
 }
 #else
 __global__ void increment_kernel()
@@ -173,11 +173,12 @@ int main(int argc, char* argv[])
     // cudaDeviceGetAttribute
     // cudaDeviceGetLimit() call stack
 
-    printf("warpSize %d clockRate %d maxThreadsPerBlock %d deviceCount %d\n\n",
-        deviceProps.warpSize, deviceProps.clockRate, deviceProps.maxThreadsPerBlock, deviceCount);
+    printf("name %s warpSize %d clockRate %d maxThreadsPerBlock %d deviceCount %d\n\n",
+        deviceProps.name, deviceProps.warpSize, deviceProps.clockRate, deviceProps.maxThreadsPerBlock, deviceCount);
 
-    int n = 32; // *1024 * 1024;
+    int n = 2; // *1024 * 1024;
     int nbytes = n * sizeof(int);
+
     int value = 26;
 
     // allocate host memory
@@ -191,10 +192,11 @@ int main(int argc, char* argv[])
     checkCudaErrors(cudaMemset(d_a, 255, nbytes));
 
     // set kernel launch configuration
-    dim3 threads = dim3(8, 1, 1);
-    dim3 blocks = dim3(n / threads.x, 1, 1);
+    dim3 threads = dim3(2, 1, 1);
+    dim3 blocks = dim3(4, 2, 2);
 
-    printf("blocks x %d y %d z %d, threads x %d y %d z %d\n\n", blocks.x, blocks.y, blocks.z, threads.x, threads.y, threads.z);
+    printf("blocks x %02d y %02d z %02d, threads x %02d y %02d z %02d\n\n",
+        blocks.x, blocks.y, blocks.z, threads.x, threads.y, threads.z);
 
     // create cuda event handles
     cudaEvent_t start, stop;
